@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Todo-List</title>
     <link type="text/css" rel="stylesheet" href="styles.css">
+
+
+    
 </head>
 
 <body>
@@ -16,16 +19,24 @@
     </div>
 
     <div class="box">
+        <form class="nostyle" action="/remove" method="POST">
 
         <% for (var i=0; i < newListItems.length ; i++) { %>
             <div class="item">
-                <input type="checkbox">
+                <input type="checkbox" class="deleteCheckBox">
 
                 <p>
                     <%= newListItems[i] %>
                 </p>
+                <button type="submit" name="delete" value="<%= newListItems[i] %>" class="deleteBtn" style="
+                    align-items: center; display: flex; margin-right: 50px;">
+                    <img width="35" height="35" src="https://img.icons8.com/color/48/delete-forever.png" alt="delete-forever" style="
+                    margin-top: 5px;"/>
+                </button>
             </div>
         <% } %>
+
+    </form>
 
     
 
@@ -39,7 +50,17 @@
 
 </div>
 
-  
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script type="text/javascript">
+
+    // $("div.item button").click(function (e) {
+    //     console.log("clicked");
+    //     e.preventDefault();
+    //     $(this).parent().remove();
+    // });
+
+</script>
 </body>
 
 </html>

@@ -24,21 +24,49 @@ if (fs.existsSync('listOfItems.txt')) {
     var listOfItems = [];
 }
 
+
+
+let workItems = [];
+
 // GET Method of Root Route
 app.get('/', (req, res) => {
-
+   
     //get current day
     var day = date.getDay();
-    res.render('list', { KindofDay: day, newListItems: listOfItems });
+    res.render('list', { listTitle: day, newListItems: listOfItems });
 
 });
 
  
+app.get('/work', (req, res) => {
+    res.render('list', { listTitle: "Work List", newListItems: workItems });
+});
+
+app.get('/about', (req, res) => {
+    res.render('about');
+});
+
+
+app.post('/work', function(req, res){
+
+    var item = req.body.newItem;
+    
+    workItems.push(item);
+    res.redirect("/work");
+
+});
 
 app.post('/add', function(req, res){
+    
+    
     //save 'item' form data
     var item = req.body.newItem;
     //push 'item' data to 'items' array
+    if (item.body.list === "Work") {
+        workItems.push(item);
+        res.redirect("/work");
+        return;
+    }
     listOfItems.push(item);
     //reload to root
     res.redirect("/");

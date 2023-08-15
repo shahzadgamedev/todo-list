@@ -1,25 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Todo-List</title>
-    <link type="text/css" rel="stylesheet" href="styles.css">
+<%- include("header") -%>
 
+<div class="box" id="heading">
+    <h1>
+        <%= listTitle %>
+    </h1>
+</div>
 
-    
-</head>
-
-<body>
-
-    <div class="box" id="heading">
-        <h1>Hey ! Well Today is <%= KindofDay %>
-        </h1>
-    </div>
-
-    <div class="box">
-        <form class="nostyle" action="/remove" method="POST">
+<div class="box">
+    <form class="nostyle" action="/remove" method="POST">
 
         <% for (var i=0; i < newListItems.length ; i++) { %>
             <div class="item">
@@ -30,37 +19,27 @@
                 </p>
                 <button type="submit" name="delete" value="<%= newListItems[i] %>" class="deleteBtn" style="
                     align-items: center; display: flex; margin-right: 50px;">
-                    <img width="35" height="35" src="https://img.icons8.com/color/48/delete-forever.png" alt="delete-forever" style="
-                    margin-top: 5px;"/>
+                    <img width="35" height="35" src="https://img.icons8.com/color/48/delete-forever.png"
+                        alt="delete-forever" style="
+                    margin-top: 5px;" />
                 </button>
             </div>
-        <% } %>
+            <% } %>
 
     </form>
 
-    
+
 
 
 
     <form class="item" action="/add" method="POST">
         <input type="text" class="" name="newItem" placeholder="New Item" required autocomplete="off"> <br>
-        <button type="submit" name="button">+</button>
+        <button type="submit" name="list" value=<%=listTitle %>>+</button>
     </form>
 
 
 </div>
 
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script type="text/javascript">
 
-    // $("div.item button").click(function (e) {
-    //     console.log("clicked");
-    //     e.preventDefault();
-    //     $(this).parent().remove();
-    // });
-
-</script>
-</body>
-
-</html>
+<%- include("footer") -%>

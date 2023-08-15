@@ -33,13 +33,15 @@ app.get('/', (req, res) => {
    
     //get current day
     var day = date.getDay();
-    res.render('list', { listTitle: day, newListItems: listOfItems });
+    res.render('list', { listTitle: "To-do List",dateText: day , newListItems: listOfItems });
 
 });
 
  
 app.get('/work', (req, res) => {
-    res.render('list', { listTitle: "Work List", newListItems: workItems });
+    //get current day
+    var day = date.getDay();
+    res.render('list', { listTitle: "Work List", dateText: day ,newListItems: workItems });
 });
 
 app.get('/about', (req, res) => {
@@ -62,7 +64,8 @@ app.post('/add', function(req, res){
     //save 'item' form data
     var item = req.body.newItem;
     //push 'item' data to 'items' array
-    if (item.body.list === "Work") {
+    
+    if (req.body.list === "Work") {
         workItems.push(item);
         res.redirect("/work");
         return;

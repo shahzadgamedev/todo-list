@@ -1,47 +1,72 @@
 const express = require('express');
-const fs = require('fs');
+const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const date = require(__dirname + '/date.js');
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
-
 app.use(express.static('public'));
 
-//list of items added by user
-if (fs.existsSync('listOfItems.txt')) {
-    var file_string = fs.readFileSync('listOfItems.txt', 'utf8');
-
-    try {
-        var listOfItems = JSON.parse(file_string);
-    } catch (err) {
-        console.log("Error in parsing file");
-        var listOfItems = [];
-    }
-    
-} else {
-    var listOfItems = [];
-}
+let TodoList;
+let WorkList;
 
 
 
-let workItems = [];
+
+
+// get list of items from database
+InitializeDatabase();
 
 // GET Method of Root Route
 app.get('/', (req, res) => {
-   
+
     //get current day
     var day = date.getDay();
-    res.render('list', { listTitle: "To-do List",dateText: day , newListItems: listOfItems });
+    var listOfItems;
+    TodoList.findOne({ name: "TodoList" }).then(foundList => {
+        if (!foundList) {
+            // create new list
+            const todoList = new TodoList({
+                name: "TodoList",
+                items: ['New Item']
+            });
+            todoList.save();
+            listOfItems = todoList.items;
+        } else {
+            listOfItems = foundList.items;
+        }
+        res.render('list', { listTitle: "TodoList", dateText: day, newListItems: listOfItems });
+    }).catch(err => {
+        console.log(err);
+    });
+
 
 });
 
- 
+
 app.get('/work', (req, res) => {
     //get current day
     var day = date.getDay();
-    res.render('list', { listTitle: "Work List", dateText: day ,newListItems: workItems });
+    var workItems;
+    // get list of items from database
+    WorkList.findOne({ name: "WorkList" }).then(foundList => {
+        if (!foundList) {
+            // create new list
+            const workList = new WorkList({
+                name: "WorkList",
+                items: ['New Item']
+            });
+            workList.save();
+            workItems = workList.items;
+        } else {
+            workItems = foundList.items;
+        }
+        res.render('list', { listTitle: "WorkList", dateText: day, newListItems: workItems });
+    }).catch(err => {
+        console.log(err);
+    });
+
 });
 
 app.get('/about', (req, res) => {
@@ -49,48 +74,68 @@ app.get('/about', (req, res) => {
 });
 
 
-app.post('/work', function(req, res){
+app.post('/work', function (req, res) {
 
     var item = req.body.newItem;
-    
+
     workItems.push(item);
     res.redirect("/work");
 
 });
 
-app.post('/add', function(req, res){
-    
-    
+app.post('/add', function (req, res) {
+
     //save 'item' form data
     var item = req.body.newItem;
     //push 'item' data to 'items' array
-    
+
     if (req.body.list === "Work") {
-        workItems.push(item);
         res.redirect("/work");
-        return;
+        // add item to database
+        WorkList.findOne({ name: "WorkList" }).then(foundList => {
+            foundList.items.push(item);
+            foundList.save();
+        }).catch(err => {
+            console.log(err);
+        });
+
     }
-    listOfItems.push(item);
+  
     //reload to root
     res.redirect("/");
+    // add item to database
+    TodoList.findOne({ name: "TodoList" }).then(foundList => {
+        foundList.items.push(item);
+        foundList.save();
+    }).catch(err => {
+        console.log(err);
+    });
 
-    console.log("Added" + req.body.newItem);
-    fs.writeFileSync('listOfItems.txt', JSON.stringify(listOfItems));
 });
 
-app.post('/remove', function(req, res){
-    
-    //remove last item from array
-    listOfItems.pop();
+app.post('/remove/:listName', function (req, res) {
+
+    var post = req.body.delete;
+
+    // remove item from database
+    TodoList.findOne({ name: req.params.listName }).then(foundList => {
+        var postIndex = foundList.items.indexOf(post);
+        foundList.items.splice(postIndex, 1);
+        foundList.save();
+    }).catch(err => {
+        console.log(err);
+    });
+
+    // remove item from array
+    listOfItems.splice(postIndex, 1);
     //reload to root
     res.redirect("/");
 
     console.log("Removed : " + req.body.newItem);
-    fs.writeFileSync('listOfItems.txt', JSON.stringify(listOfItems));
 });
 
 
-app.post('/home', function(req, res){
+app.post('/home', function (req, res) {
     //reload to root
     res.redirect("/");
 });
@@ -103,7 +148,7 @@ app.post('/home', function(req, res){
 // code as 404 (HTTP status code for NOT found)
 app.all('*', (req, res) => {
     res.status(404).sendFile(__dirname + '/public/404.html');
-  });
+});
 
 
 
@@ -112,3 +157,16 @@ app.all('*', (req, res) => {
 app.listen('80', '192.168.29.131', () => {
     console.log('server started at http://192.168.29.131');
 });
+
+
+
+function InitializeDatabase() {
+    var uri = "mongodb://127.0.0.1:27017/todolistDB";
+    mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+    const todoSchema = new mongoose.Schema({
+        name: String,
+        items: [String]
+    });
+    TodoList = mongoose.model("TodoList", todoSchema);
+    WorkList = mongoose.model("WorkList", todoSchema);
+}
